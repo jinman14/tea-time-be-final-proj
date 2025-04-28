@@ -4,8 +4,8 @@ RSpec.describe "TeaSubscriptions", type: :request do
   before(:each) do
     @customer1 = create(:customer, first_name: "Koala", last_name: "Tea Control")
     @customer2 = create(:customer, first_name: "Cutie", last_name: "Patootie")
-    @tea1 = create(:tea)
-    @tea2 = create(:tea)
+    @tea1 = create(:tea, name: "Fireside Vanilla")
+    @tea2 = create(:tea, name: "Tension Tamer")
 
     @tea_sub1 = create(:tea_subscription, customer: @customer1, tea: @tea1)
     @tea_sub2 = create(:tea_subscription, customer: @customer2, tea: @tea2)
@@ -26,6 +26,23 @@ RSpec.describe "TeaSubscriptions", type: :request do
       expect(json[:data].first[:attributes][:tea_type]).to eq(@tea1.name)
     end
 
+    it "can search subscriptions with tsvector by customer name" do
+      get "/api/v1/tea_subscriptions", params: { query: "Koala Tea Control" }
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:ok)
+      expect(json[:data].first[:id]).to eq(@tea_sub1.id.to_s)
+    end
+
+    it "can search by tea" do
+      get "/api/v1/tea_subscriptions", params: { query: "Tension Tamer" }
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:ok)
+      expect(json[:total_subscriptions]).to eq(1)
+      expect(json[:data].first[:id]).to eq(@tea_sub2.id.to_s)
+    end
+
     it "can get a single subscription with more details" do
       get "/api/v1/tea_subscriptions/#{@tea_sub1.id}"
       json = JSON.parse(response.body, symbolize_names: true)
@@ -42,6 +59,14 @@ RSpec.describe "TeaSubscriptions", type: :request do
       expect(json[:data][:attributes][:tea_details][:description]).to eq(@tea1.description)
       expect(json[:data][:attributes][:tea_details][:brew_time]).to eq(@tea1.brew_time)
       expect(json[:data][:attributes][:tea_details][:temperature]).to eq(@tea1.temperature)
+    end
+
+    it "will return an error if the id does not exist" do
+      get "/api/v1/tea_subscriptions/banana"
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:not_found)
+      expect(json[:error]).to include("Couldn't find TeaSubscription with 'id'")
     end
   end
 

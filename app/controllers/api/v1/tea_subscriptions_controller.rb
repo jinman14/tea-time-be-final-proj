@@ -2,8 +2,12 @@ class Api::V1::TeaSubscriptionsController < ApplicationController
   before_action :set_tea_subscription, only: [:show, :update]
 
   def index
-    subscriptions = TeaSubscription.all
-# plan to add tsvector here later for searchable function
+    if params[:query].present?
+      search_query = ActiveRecord::Base.connection.quote(params[:query])
+      subscriptions = TeaSubscription.search(search_query)
+    else
+      subscriptions = TeaSubscription.all
+    end
     render json: TeaSubscriptionSerializer.format_subscription_list(subscriptions)
   end
 
