@@ -10,6 +10,7 @@ RSpec.describe "TeaSubscriptions", type: :request do
     @tea_sub1 = create(:tea_subscription, customer: @customer1, tea: @tea1)
     @tea_sub2 = create(:tea_subscription, customer: @customer2, tea: @tea2)
   end
+
   describe "GET" do
     it "returns a list of all tea_subscriptions" do
       get "/api/v1/tea_subscriptions"
@@ -90,7 +91,7 @@ RSpec.describe "TeaSubscriptions", type: :request do
       
       post "/api/v1/tea_subscriptions", params: bad_params.to_json, headers: headers
       
-      expect(response).to have_http_status(:bad_request)
+      expect(response).to have_http_status(:unprocessable_entity)
       json = JSON.parse(response.body, symbolize_names: true)
       
       expect(json[:error]).to be_present
@@ -99,13 +100,33 @@ RSpec.describe "TeaSubscriptions", type: :request do
 
   describe "PATCH" do
     it "can deactivate an existing subscription" do
-      patch "/api/v1/tea_subscription/#{@tea_sub2.id}", params: { tea_subscription: { status: "inactive" } }.to_json, headers: { "CONTENT_TYPE" => "application/json" }
+      patch "/api/v1/tea_subscriptions/#{@tea_sub2.id}", params: { tea_subscription: { status: "inactive" } }.to_json, headers: { "CONTENT_TYPE" => "application/json" }
 
-      expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body, symbolize_names: true)
-
+      
+      expect(response).to have_http_status(:ok)
       expect(json[:data][:id]).to eq(@tea_sub2.id.to_s)
       expect(json[:data][:attributes][:status]).to eq("inactive")
+    end
+
+    it "can activate an existing subscription" do
+      tea_sub3 = create(:tea_subscription, customer: @customer1, tea: @tea2, status: :inactive)
+
+      patch "/api/v1/tea_subscriptions/#{tea_sub3.id}", params: { tea_subscription: { status: "active" } }.to_json, headers: { "CONTENT_TYPE" => "application/json" }
+
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:ok)
+      expect(json[:data][:id]).to eq(tea_sub3.id.to_s)
+      expect(json[:data][:attributes][:status]).to eq("active")
+    end
+
+    it "returns an error if given invalid status" do
+      patch "/api/v1/tea_subscriptions/#{@tea_sub1.id}", params: { tea_subscription: { status: "expired" } }.to_json, headers: { "CONTENT_TYPE" => "application/json" }
+      json = JSON.parse(response.body, symbolize_names: true)
+      
+      expect(response).to have_http_status(:internal_server_error)
+      expect(json[:error]).to include("is not a valid status")
     end
   end
 end
