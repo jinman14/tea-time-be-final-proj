@@ -47,6 +47,6 @@ end
 group :test do
   gem "simplecov"
   gem 'factory_bot_rails'
-  gem 'rspec-rails'
+  gem 'faker'
 end
 
