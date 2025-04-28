@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_04_28_170320) do
+ActiveRecord::Schema[7.1].define(version: 2025_04_28_223802) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -30,7 +30,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_04_28_170320) do
     t.integer "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.tsvector "search_vector"
     t.index ["customer_id"], name: "index_tea_subscriptions_on_customer_id"
+    t.index ["search_vector"], name: "index_tea_subscriptions_on_search_vector", using: :gin
     t.index ["tea_id"], name: "index_tea_subscriptions_on_tea_id"
   end
 
