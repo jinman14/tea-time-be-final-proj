@@ -96,4 +96,16 @@ RSpec.describe "TeaSubscriptions", type: :request do
       expect(json[:error]).to be_present
     end
   end
+
+  describe "PATCH" do
+    it "can deactivate an existing subscription" do
+      patch "/api/v1/tea_subscription/#{@tea_sub2.id}", params: { tea_subscription: { status: "inactive" } }.to_json, headers: { "CONTENT_TYPE" => "application/json" }
+
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(json[:data][:id]).to eq(@tea_sub2.id.to_s)
+      expect(json[:data][:attributes][:status]).to eq("inactive")
+    end
+  end
 end
