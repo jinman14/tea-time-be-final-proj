@@ -43,4 +43,57 @@ RSpec.describe "TeaSubscriptions", type: :request do
       expect(json[:data][:attributes][:tea_details][:temperature]).to eq(@tea1.temperature)
     end
   end
+
+  describe "POST" do
+    it "can create and display a new subscription" do
+      new_subscription_params = {
+        tea_subscription: {
+          "customer_id": @customer2.id,
+          "tea_id": @tea1.id,
+          "frequency": "weekly",
+          "status": "active"
+        }
+      }
+
+      headers = { "CONTENT_TYPE" => "application/json" }
+
+      post "/api/v1/tea_subscriptions", params: new_subscription_params.to_json, headers: headers
+
+      expect(response).to have_http_status(:created)
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(json[:data][:id]).to be_present
+      expect(json[:data][:type]).to eq("tea_subscription")
+      expect(json[:data][:attributes][:frequency]).to eq("weekly")
+      expect(json[:data][:attributes][:status]).to eq("active")
+
+      expect(json[:data][:attributes][:customer_details][:full_name]).to eq("Cutie Patootie")
+      expect(json[:data][:attributes][:customer_details][:email]).to eq(@customer2.email)
+      expect(json[:data][:attributes][:customer_details][:address]).to eq(@customer2.address)
+
+      expect(json[:data][:attributes][:tea_details][:name]).to eq(@tea1.name)
+      expect(json[:data][:attributes][:tea_details][:description]).to eq(@tea1.description)
+      expect(json[:data][:attributes][:tea_details][:brew_time]).to eq(@tea1.brew_time)
+      expect(json[:data][:attributes][:tea_details][:temperature]).to eq(@tea1.temperature)
+    end
+
+    it "catches if a bad post call is made" do
+      bad_params = {
+        tea_subscription: {
+          customer_id: @customer2.id,
+          frequency: "weekly",
+          status: "active"
+        }
+      }
+      
+      headers = { "CONTENT_TYPE" => "application/json" }
+      
+      post "/api/v1/tea_subscriptions", params: bad_params.to_json, headers: headers
+      
+      expect(response).to have_http_status(:bad_request)
+      json = JSON.parse(response.body, symbolize_names: true)
+      
+      expect(json[:error]).to be_present
+    end
+  end
 end
