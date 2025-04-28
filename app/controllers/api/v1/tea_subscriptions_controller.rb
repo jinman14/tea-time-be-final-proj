@@ -3,7 +3,7 @@ class Api::V1::TeaSubscriptionsController < ApplicationController
 
   def index
     subscriptions = TeaSubscription.all
-
+# plan to add tsvector here later for searchable function
     render json: TeaSubscriptionSerializer.format_subscription_list(subscriptions)
   end
 
