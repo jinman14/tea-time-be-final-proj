@@ -17,4 +17,28 @@ class TeaSubscriptionSerializer
       total_subscriptions: subscriptions.size
     }
   end
+
+  def self.format_single_subscription(subscription)
+    {
+      data: {
+        id: subscription.id.to_s,
+        type: "tea_subscription",
+        attributes: {
+          frequency: subscription.frequency,
+          status: subscription.status,
+          customer_details: {
+            full_name: "#{subscription.customer.first_name} #{subscription.customer.last_name}",
+            email: subscription.customer.email,
+            address: subscription.customer.address
+          },
+          tea_details: {
+            name: subscription.tea.name,
+            description: subscription.tea.description,
+            brew_time: subscription.tea.brew_time,
+            temperature: subscription.tea.temperature
+          }
+        }
+      }
+    }    
+  end
 end

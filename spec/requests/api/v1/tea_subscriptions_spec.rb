@@ -26,7 +26,7 @@ RSpec.describe "TeaSubscriptions", type: :request do
     end
 
     it "can get a single subscription with more details" do
-      get `/api/v1/tea_subscriptions/#{@tea_sub1.id}`
+      get "/api/v1/tea_subscriptions/#{@tea_sub1.id}"
       json = JSON.parse(response.body, symbolize_names: true)
 
       expect(response).to have_http_status(:ok)
@@ -34,13 +34,13 @@ RSpec.describe "TeaSubscriptions", type: :request do
       expect(json[:data][:type]).to eq("tea_subscription")
       expect(json[:data][:attributes][:frequency]).to eq(@tea_sub1.frequency)
       expect(json[:data][:attributes][:status]).to eq(@tea_sub1.status)
-      expect(json[:data][:attributes][:customer][:full_name]).to eq("Koala Tea Control")
-      expect(json[:data][:attributes][:customer][:email]).to eq(@customer1.email)
-      expect(json[:data][:attributes][:customer][:address]).to eq(@customer1.address)
-      expect(json[:data][:attributes][:tea][:name]).to eq(@tea1.name)
-      expect(json[:data][:attributes][:tea][:description]).to eq(@tea1.description)
-      expect(json[:data][:attributes][:tea][:brew_time]).to eq(@tea1.brew_time)
-      expect(json[:data][:attributes][:tea][:temperature]).to eq(@tea1.temperature)
+      expect(json[:data][:attributes][:customer_details][:full_name]).to eq("Koala Tea Control")
+      expect(json[:data][:attributes][:customer_details][:email]).to eq(@customer1.email)
+      expect(json[:data][:attributes][:customer_details][:address]).to eq(@customer1.address)
+      expect(json[:data][:attributes][:tea_details][:name]).to eq(@tea1.name)
+      expect(json[:data][:attributes][:tea_details][:description]).to eq(@tea1.description)
+      expect(json[:data][:attributes][:tea_details][:brew_time]).to eq(@tea1.brew_time)
+      expect(json[:data][:attributes][:tea_details][:temperature]).to eq(@tea1.temperature)
     end
   end
 end
